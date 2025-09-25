@@ -27,7 +27,7 @@ module PLY (-- * Easy loading interface
 import Control.Applicative
 import Control.Concurrent.ParallelIO (parallel)
 import Control.Monad ((>=>))
-import Control.Monad.Trans.Error
+import Control.Monad.Trans.Except
 import Data.Attoparsec.ByteString.Char8
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as BS
@@ -138,9 +138,9 @@ loadConfV3 :: forall a. (PLYType a, Fractional a, Conjugate a, RealFloat a)
            => ByteString -> FilePath -> IO (Either String (VS.Vector (V3 a)))
 loadConfV3 element confFile = 
   do dir <- takeDirectory <$> canonicalizePath confFile
-     runErrorT $
-       do c <- ErrorT $ parseConf <$> BS.readFile confFile
-          ErrorT $ checkConcat <$> loadAll dir c
+     runExceptT $
+       do c <- ExceptT $ parseConf <$> BS.readFile confFile
+          ExceptT $ checkConcat <$> loadAll dir c
     where checkErrors :: [ErrorMsg b] -> ErrorMsg [b]
           checkErrors xs = let (ls,rs) = partitionEithers xs
                            in if null ls then Right rs else Left (unlines ls)
