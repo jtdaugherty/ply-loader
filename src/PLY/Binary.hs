@@ -31,7 +31,11 @@ mkElParser props
                              aux i = let parsers = V.map mkScalarParser props'
                                      in parsers ! i
                          in V.generateM (V.length props') aux
-  | null (tail props) = let (ListProperty t _) = head props in mkListParser t
+  | null (tail props) =
+      case head props of
+          ListProperty t _ -> mkListParser t
+          _ -> error "mkElParser: unexpected head props result"
+
   | otherwise = error $ "Binary elements with multiple property "++
                         "lists are not supported!"
   where getScalar (ScalarProperty t _) = Just t
